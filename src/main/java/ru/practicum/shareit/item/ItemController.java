@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class ItemController {
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Set<Item> searchItem(@RequestHeader("X-Sharer-User-Id") int userId,
-                             @RequestParam String text) {
+                                @RequestParam String text) {
         return itemService.searchItem(userId, text);
     }
 }
