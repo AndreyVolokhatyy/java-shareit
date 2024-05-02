@@ -1,27 +1,26 @@
 package ru.practicum.shareit.request.dto;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.shareit.request.ItemRequest;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@Builder
 public class ItemRequestDto {
 
     private String description;
     private int requestor;
     private LocalDateTime created;
 
-    public ItemRequestDto(String description, int requestor, LocalDateTime created) {
-        this.description = description;
-        this.requestor = requestor;
-        this.created = created;
-    }
-
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
-        return new ItemRequestDto(itemRequest.getDescription(),
-                itemRequest.getRequestor(),
-                itemRequest.getCreated()
-        );
+        return ItemRequestDto.builder()
+                .description(itemRequest.getDescription())
+                .requestor(itemRequest.getRequestor())
+                .created(itemRequest.getCreated())
+                .build();
     }
 }

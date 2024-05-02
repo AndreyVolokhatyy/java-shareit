@@ -1,9 +1,11 @@
 package ru.practicum.shareit.item.service.impl;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.heandler.exception.NotFoundValueException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.repository.ItemRepository;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -15,20 +17,22 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceInMemory implements ItemService {
 
-    private static Map<Integer, Item> items = new HashMap<>();
+    private ItemRepository itemRepository;
     private static int id = 1;
     private ItemRequestService itemRequestService;
     private UserService userService;
 
-    public ItemServiceInMemory(ItemRequestService itemRequestService, UserService userService) {
+    public ItemServiceInMemory(ItemRequestService itemRequestService, UserService userService, ItemRepository itemRepository) {
         this.itemRequestService = itemRequestService;
         this.userService = userService;
+        this.itemRepository = itemRepository;
     }
 
     @Override
-    public Item createItem(int userId, ItemDto itemDto) {
+    public Item createItem(Map<String, String> headers, ItemDto itemDto) {
+        int userId = getUserId(headers);
         if (!checkUser(userId)) {
-            throw new NullPointerException();
+            throw new NotFoundValueException();
         }
         if (itemDto.getAvailable() == null
                 || itemDto.getName() == null
@@ -41,16 +45,17 @@ public class ItemServiceInMemory implements ItemService {
         item.setId(id);
         item.setOwner(userId);
         item.setRequest(itemRequestService.getItemRequests().get(itemDto.getRequest()));
-        items.put(id, item);
+        itemRepository.put(item);
         id++;
         return item;
     }
 
     @Override
-    public Item updateItem(int userId, int itemId, ItemDto itemDto) {
-        Item item = items.get(itemId);
+    public Item updateItem(Map<String, String> headers, int itemId, ItemDto itemDto) {
+        Item item = itemRepository.get(itemId);
+        int userId = getUserId(headers);
         if (!checkUser(userId) || item.getOwner() != userId) {
-            throw new NullPointerException();
+            throw new NotFoundValueException();
         }
         if (itemDto.getName() != null && !itemDto.getName().isEmpty()) {
             item.setName(itemDto.getName());
@@ -68,17 +73,19 @@ public class ItemServiceInMemory implements ItemService {
     }
 
     @Override
-    public Item getItem(int userId, int id) {
-        Item item = items.get(id);
+    public Item getItem(Map<String, String> headers, int id) {
+        Item item = itemRepository.get(id);
+        int userId = getUserId(headers);
         if (!checkUser(userId)) {
-            throw new NullPointerException();
+            throw new NotFoundValueException();
         }
         return item;
     }
 
     @Override
-    public Set<Item> getItemUser(int userId) {
-        return items.values().stream()
+    public Set<Item> getItemUser(Map<String, String> headers) {
+        int userId = getUserId(headers);
+        return itemRepository.getStream()
                 .filter(i -> i.getOwner() == userId)
                 .collect(
                         Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingInt(Item::getId)))
@@ -86,11 +93,11 @@ public class ItemServiceInMemory implements ItemService {
     }
 
     @Override
-    public Set<Item> searchItem(int userId, String text) {
+    public Set<Item> searchItem( String text) {
         if (text.isEmpty()) {
             return new HashSet<>();
         }
-        return items.values().stream()
+        return itemRepository.getStream()
                 .filter(Item::getAvailable)
                 .filter(i -> i.getName().toLowerCase().contains(text.toLowerCase())
                         || i.getDescription().toLowerCase().contains(text.toLowerCase()))
@@ -108,5 +115,9 @@ public class ItemServiceInMemory implements ItemService {
             }
         }
         return check;
+    }
+
+    private int getUserId(Map<String, String> headers) {
+            return Integer.parseInt(headers.get("x-sharer-user-id"));
     }
 }

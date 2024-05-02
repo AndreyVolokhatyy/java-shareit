@@ -5,6 +5,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.heandler.exception.NotFoundValueException;
 
 import javax.validation.ValidationException;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class ErrorHandler {
         return Map.of("Validation error", "Check your request.");
     }
 
-    @ExceptionHandler({NullPointerException.class})
+    @ExceptionHandler({NullPointerException.class, NotFoundValueException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundRequest() {
         return Map.of("Validation error", "Check your request.");

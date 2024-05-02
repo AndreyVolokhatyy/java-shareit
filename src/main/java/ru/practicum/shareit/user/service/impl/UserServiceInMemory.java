@@ -4,18 +4,21 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.service.repository.UserRepository;
 
 import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceInMemory implements UserService {
 
-    private static Map<Integer, User> users = new HashMap<>();
+    private UserRepository userRepository;
     private static int id = 1;
+
+    public UserServiceInMemory(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public User creatUser(UserDto userDto) {
@@ -27,14 +30,14 @@ public class UserServiceInMemory implements UserService {
             throw new RuntimeException();
         }
         user.setId(id);
-        users.put(id, user);
+        userRepository.put(user);
         id++;
         return user;
     }
 
     @Override
     public User updateUser(int id, UserDto userDto) {
-        User user = users.get(id);
+        User user = userRepository.get(id);
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
@@ -50,27 +53,22 @@ public class UserServiceInMemory implements UserService {
 
     @Override
     public User getUser(int id) {
-        return users.get(id);
+        return userRepository.get(id);
     }
 
     @Override
     public void deleteUser(int id) {
-        users.remove(id);
+        userRepository.delete(id);
     }
 
     @Override
     public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+        return userRepository.getStream().collect(Collectors.toList());
     }
 
     private int checkEmail(String email) {
-        int id = 0;
-        for (User user : users.values()) {
-            if (user.getEmail().equals(email)) {
-                id = user.getId();
-                break;
-            }
-        }
-        return id;
+        return userRepository.getStream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst().map(User::getId).orElse(0);
     }
 }

@@ -3,17 +3,18 @@ package ru.practicum.shareit.item.service;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface ItemService {
 
-    Item createItem(int userId, ItemDto itemDto);
+    Item createItem(Map<String, String> headers, ItemDto itemDto);
 
-    Item updateItem(int userId, int itemId, ItemDto itemDto);
+    Item updateItem(Map<String, String> headers, int itemId, ItemDto itemDto);
 
-    Item getItem(int userId, int id);
+    Item getItem(Map<String, String> headers, int id);
 
-    Set<Item> getItemUser(int userId);
+    Set<Item> getItemUser(Map<String, String> headers);
 
-    Set<Item> searchItem(int userId, String text);
+    Set<Item> searchItem(String text);
 }
