@@ -93,7 +93,7 @@ public class ItemServiceInMemory implements ItemService {
     }
 
     @Override
-    public Set<Item> searchItem( String text) {
+    public Set<Item> searchItem(String text) {
         if (text.isEmpty()) {
             return new HashSet<>();
         }
@@ -118,6 +118,6 @@ public class ItemServiceInMemory implements ItemService {
     }
 
     private int getUserId(Map<String, String> headers) {
-            return Integer.parseInt(headers.get("x-sharer-user-id"));
+        return Integer.parseInt(headers.get("x-sharer-user-id"));
     }
 }
