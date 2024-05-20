@@ -15,7 +15,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     private static Map<Long, Item> items = new HashMap<>();
 
     @Override
-    public Item get(int id) {
+    public Item get(long id) {
         return items.get(id);
     }
 

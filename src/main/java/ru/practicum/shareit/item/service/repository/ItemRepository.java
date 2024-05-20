@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 public interface ItemRepository {
 
-    Item get(int id);
+    Item get(long id);
 
     void put(Item item);
 
