@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Component
 public class UserRepositoryImpl implements UserRepository {
 
-    private static Map<Integer, User> users = new HashMap<>();
+    private static Map<Long, User> users = new HashMap<>();
 
     @Override
     public User get(int id) {

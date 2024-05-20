@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Component
 public class ItemRepositoryImpl implements ItemRepository {
 
-    private static Map<Integer, Item> items = new HashMap<>();
+    private static Map<Long, Item> items = new HashMap<>();
 
     @Override
     public Item get(int id) {
