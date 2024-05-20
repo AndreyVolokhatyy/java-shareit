@@ -15,7 +15,7 @@ public class UserRepositoryImpl implements UserRepository {
     private static Map<Long, User> users = new HashMap<>();
 
     @Override
-    public User get(int id) {
+    public User get(long id) {
         return users.get(id);
     }
 
@@ -25,7 +25,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         users.remove(id);
     }
 
