@@ -1,13 +1,15 @@
 package ru.practicum.shareit.comment.dto;
 
 import lombok.Builder;
-import lombok.Data;
-import ru.practicum.shareit.comment.Comment;
+import lombok.Getter;
+import lombok.Setter;
+import ru.practicum.shareit.comment.model.Comment;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class CommentDto {
 

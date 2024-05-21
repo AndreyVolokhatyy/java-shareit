@@ -6,16 +6,18 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingStorage;
-import ru.practicum.shareit.comment.Comment;
+import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.storage.CommentStorage;
 import ru.practicum.shareit.heandler.exception.BadRequestException;
 import ru.practicum.shareit.heandler.exception.NotFoundValueException;
+import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.repository.ItemStorage;
 import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -42,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item createItem(Map<String, String> headers, ItemDto itemDto) {
+    public ItemCreatedDto createItem(Map<String, String> headers, ItemDto itemDto) {
         int userId = getUserId(headers);
         if (itemDto.getAvailable() == null
                 || itemDto.getName() == null
@@ -55,14 +57,13 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundValueException();
         }
         Item item = ItemDto.toItem(itemDto);
-        item.setUser(userService.getUser(userId));
+        item.setUser(UserDto.toUser(userService.getUser(userId)));
         item.setRequest(itemRequestService.getItemRequests().get(itemDto.getRequest()));
-        itemStorage.save(item);
-        return item;
+        return ItemCreatedDto.toItemDto(itemStorage.save(item));
     }
 
     @Override
-    public Item updateItem(Map<String, String> headers, long itemId, ItemDto itemDto) {
+    public ItemCreatedDto updateItem(Map<String, String> headers, long itemId, ItemDto itemDto) {
         Item item = itemStorage.findById(itemId).orElseThrow(NotFoundValueException::new);
         int userId = getUserId(headers);
         if (!checkUser(userId) || item.getUser().getId() != userId) {
@@ -80,8 +81,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getRequest() != null) {
             item.setRequest(itemRequestService.getItemRequests().get(itemDto.getRequest()));
         }
-        itemStorage.save(item);
-        return item;
+        return ItemCreatedDto.toItemDto(itemStorage.save(item));
     }
 
     @Override
@@ -118,7 +118,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Set<Item> searchItem(String text) {
+    public Set<ItemCreatedDto> searchItem(String text) {
         if (text.isEmpty()) {
             return new HashSet<>();
         }
@@ -126,14 +126,15 @@ public class ItemServiceImpl implements ItemService {
                 .filter(Item::getAvailable)
                 .filter(i -> i.getName().toLowerCase().contains(text.toLowerCase())
                         || i.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .map(ItemCreatedDto::toItemDto)
                 .collect(
-                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingLong(Item::getId)))
+                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingLong(ItemCreatedDto::getId)))
                 );
     }
 
     private boolean checkUser(int id) {
         boolean check = false;
-        for (User user : userService.getUsers()) {
+        for (User user : userService.getUsers().stream().map(UserDto::toUser).collect(Collectors.toList())) {
             if (user.getId() == id) {
                 check = true;
                 break;
@@ -148,7 +149,7 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = CommentDto.toComment(commentCreatedDto);
         int userId = getUserId(headers);
         Item item = getItem(headers, itemId);
-        User user = userService.getUser(userId);
+        User user = UserDto.toUser(userService.getUser(userId));
         List<Booking> bookings = bookingStorage.findByItemIdAndBookerId(itemId, userId);
         if (bookings.isEmpty()) {
             throw new BadRequestException("Только арендаторы могут оставлять отзыв!");

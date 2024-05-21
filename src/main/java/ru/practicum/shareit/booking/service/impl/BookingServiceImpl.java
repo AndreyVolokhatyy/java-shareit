@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingCreatedDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -32,11 +35,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public Booking addBooking(BookingDto bookingDto, Map<String, String> headers) {
+    public BookingCreatedDto addBooking(BookingDto bookingDto, Map<String, String> headers) {
         long userId = getUserId(headers);
         Booking booking = BookingDto.toBooking(bookingDto);
         Item item = itemService.getItem(headers, bookingDto.getItemId());
-        User user = userService.getUser(userId);
+        User user = userService.get(userId);
         if (!item.getAvailable()) {
             throw new BadRequestException(String.format("Вещь с ID %d нельзя арендовать", item.getId()));
         }
@@ -54,13 +57,12 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(Status.WAITING);
         booking.setItem(item);
         booking.setBooker(user);
-        bookingStorage.save(booking);
-        return booking;
+        return BookingCreatedDto.toBookingDto(bookingStorage.save(booking));
     }
 
     @Override
     @Transactional
-    public Booking approveBooking(long bookingId, boolean status, Map<String, String> headers) {
+    public BookingCreatedDto approveBooking(long bookingId, boolean status, Map<String, String> headers) {
         Booking booking = validateBooking(bookingId);
         long userId = getUserId(headers);
         if (booking.getItem().getUser().getId() != userId) {
@@ -77,55 +79,66 @@ public class BookingServiceImpl implements BookingService {
             }
             booking.setStatus(Status.REJECTED);
         }
-        bookingStorage.save(booking);
-        return booking;
+        return BookingCreatedDto.toBookingDto(bookingStorage.save(booking));
     }
 
     @Override
-    public Booking getBookingById(long bookingId, Map<String, String> headers) {
+    public BookingCreatedDto getBookingById(long bookingId, Map<String, String> headers) {
         Booking booking = validateBooking(bookingId);
-        return checkBookingOwnerOrItemOwner(booking, getUserId(headers));
+        return BookingCreatedDto.toBookingDto(checkBookingOwnerOrItemOwner(booking, getUserId(headers)));
     }
 
     @Override
-    public Collection<Booking> getUserBookings(String state, Map<String, String> headers) {
+    public Collection<BookingCreatedDto> getUserBookings(State state, Map<String, String> headers) {
         long userId = userService.getUser(getUserId(headers)).getId();
         switch (state) {
-            case "ALL":
-                return bookingStorage.findAllByBookerIdOrderByStartDesc(userId);
-            case "PAST":
-                return bookingStorage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId);
-            case "FUTURE":
-                return bookingStorage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId);
-            case "CURRENT":
+            case ALL:
+                return bookingStorage.findAllByBookerIdOrderByStartDesc(userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case PAST:
+                return bookingStorage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case FUTURE:
+                return bookingStorage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case CURRENT:
                 return bookingStorage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
-                        LocalDateTime.now(), LocalDateTime.now(), userId);
-            case "WAITING":
-                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
-            case "REJECTED":
-                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                        LocalDateTime.now(), LocalDateTime.now(), userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case WAITING:
+                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case REJECTED:
+                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
     }
 
     @Override
-    public Collection<Booking> getAllBookingsByUserOwner(String state, Map<String, String> headers) {
+    public Collection<BookingCreatedDto> getAllBookingsByUserOwner(State state, Map<String, String> headers) {
         long userId = userService.getUser(getUserId(headers)).getId();
         switch (state) {
-            case "ALL":
-                return bookingStorage.findAllByItemUserIdOrderByStartDesc(userId);
-            case "PAST":
-                return bookingStorage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId);
-            case "FUTURE":
-                return bookingStorage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
-            case "CURRENT":
+            case ALL:
+                return bookingStorage.findAllByItemUserIdOrderByStartDesc(userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case PAST:
+                return bookingStorage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case FUTURE:
+                return bookingStorage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now())
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case CURRENT:
                 return bookingStorage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
-                        LocalDateTime.now(), LocalDateTime.now(), userId);
-            case "WAITING":
-                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING);
-            case "REJECTED":
-                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                        LocalDateTime.now(), LocalDateTime.now(), userId)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case WAITING:
+                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
+            case REJECTED:
+                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED)
+                        .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }

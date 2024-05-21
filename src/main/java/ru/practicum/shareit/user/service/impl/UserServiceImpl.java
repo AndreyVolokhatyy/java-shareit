@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.service.repository.UserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -19,15 +20,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User creatUser(UserDto userDto) {
+    public UserDto creatUser(UserDto userDto) {
         User user = UserDto.toUser(userDto);
-        userStorage.save(user);
-        return user;
+        return UserDto.toUserDto(userStorage.save(user));
     }
 
     @Override
-    public User updateUser(long id, UserDto userDto) {
-        User user = userStorage.findById(id).get();
+    public UserDto updateUser(long id, UserDto userDto) {
+        User user = userStorage.findById(id).orElseThrow(NotFoundValueException::new);
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
@@ -38,13 +38,12 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException();
             }
         }
-        userStorage.save(user);
-        return user;
+        return UserDto.toUserDto(userStorage.save(user));
     }
 
     @Override
-    public User getUser(long id) {
-        return userStorage.findById(id).orElseThrow(NotFoundValueException::new);
+    public UserDto getUser(long id) {
+        return UserDto.toUserDto(get(id));
     }
 
     @Override
@@ -53,8 +52,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers() {
-        return userStorage.findAll();
+    public List<UserDto> getUsers() {
+        return userStorage.findAll().stream().map(UserDto::toUserDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public User get(long id) {
+        return userStorage.findById(id).orElseThrow(NotFoundValueException::new);
     }
 
     private long checkEmail(String email) {

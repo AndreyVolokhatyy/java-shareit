@@ -3,8 +3,9 @@ package ru.practicum.shareit.booking;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
@@ -24,33 +25,33 @@ public class BookingController {
     }
 
     @PostMapping
-    public Booking addBooking(@RequestHeader Map<String, String> headers,
-                              @Valid @RequestBody BookingDto bookingDto) {
+    public BookingCreatedDto addBooking(@RequestHeader Map<String, String> headers,
+                                        @Valid @RequestBody BookingDto bookingDto) {
         return service.addBooking(bookingDto, headers);
     }
 
     @PatchMapping("/{bookingId}")
-    public Booking approveBooking(@RequestHeader Map<String, String> headers,
+    public BookingCreatedDto approveBooking(@RequestHeader Map<String, String> headers,
                                   @PathVariable long bookingId,
                                   @RequestParam(name = "approved") boolean status) {
         return service.approveBooking(bookingId, status, headers);
     }
 
     @GetMapping("/{bookingId}")
-    public Booking getBookingById(@RequestHeader Map<String, String> headers,
+    public BookingCreatedDto getBookingById(@RequestHeader Map<String, String> headers,
                                   @PathVariable long bookingId) {
         return service.getBookingById(bookingId, headers);
     }
 
     @GetMapping
-    public Collection<Booking> getAllBookingsByUser(@RequestHeader Map<String, String> headers,
-                                                    @RequestParam(name = "state", defaultValue = "ALL") String state) {
+    public Collection<BookingCreatedDto> getAllBookingsByUser(@RequestHeader Map<String, String> headers,
+                                                    @RequestParam(name = "state", defaultValue = "ALL") State state) {
         return service.getUserBookings(state, headers);
     }
 
     @GetMapping("/owner")
-    public Collection<Booking> getBookingsByUser(@RequestHeader Map<String, String> headers,
-                                                 @RequestParam(name = "state", defaultValue = "ALL") String state) {
+    public Collection<BookingCreatedDto> getBookingsByUser(@RequestHeader Map<String, String> headers,
+                                                 @RequestParam(name = "state", defaultValue = "ALL") State state) {
         return service.getAllBookingsByUserOwner(state, headers);
     }
 }

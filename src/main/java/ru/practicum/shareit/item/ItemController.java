@@ -3,8 +3,8 @@ package ru.practicum.shareit.item;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -23,13 +23,13 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Item createItem(@RequestHeader Map<String, String> headers, @Valid @RequestBody ItemDto itemDto) {
+    public ItemCreatedDto createItem(@RequestHeader Map<String, String> headers, @Valid @RequestBody ItemDto itemDto) {
         return itemService.createItem(headers, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public Item itemUpdate(@RequestHeader Map<String, String> headers,
+    public ItemCreatedDto itemUpdate(@RequestHeader Map<String, String> headers,
                            @PathVariable(value = "itemId") int itemId,
                            @Valid @RequestBody ItemDto itemDto) {
         return itemService.updateItem(headers, itemId, itemDto);
@@ -49,7 +49,7 @@ public class ItemController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Set<Item> searchItem(@RequestParam String text) {
+    public Set<ItemCreatedDto> searchItem(@RequestParam String text) {
         return itemService.searchItem(text);
     }
 
