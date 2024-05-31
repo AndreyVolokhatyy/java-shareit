@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.storage.CommentStorage;
+import ru.practicum.shareit.heandler.exception.BadRequestException;
 import ru.practicum.shareit.heandler.exception.NotFoundValueException;
 import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -29,8 +30,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -546,6 +547,207 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void commentBadRequestException() {
+        User owner = User.builder()
+                .id(1L)
+                .name("user")
+                .email("user@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        LocalDateTime created = LocalDateTime.now();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(created.minusMonths(5))
+                .end(created.minusMonths(4))
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+        when(bookingRepository
+                .findByItemIdAndBookerId(any(Long.class), any(Long.class))
+        ).thenReturn(List.of());
+
+        Comment comment = Comment.builder()
+                .id(1L)
+                .text("text")
+                .item(item)
+                .author(booker)
+                .created(created)
+                .build();
+        when(commentRepository.save(any()))
+                .thenReturn(comment);
+
+        CommentDto commentDto = CommentDto.builder()
+                .text("comment")
+                .build();
+        Assertions.assertThrows(BadRequestException.class, () -> itemService.addComment(commentDto, 1L, headers));
+    }
+
+    @Test
+    void commentRejecting() {
+        User owner = User.builder()
+                .id(1L)
+                .name("user")
+                .email("user@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        LocalDateTime created = LocalDateTime.now();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(created.minusMonths(5))
+                .end(created.minusMonths(4))
+                .item(item)
+                .booker(booker)
+                .status(Status.REJECTED)
+                .build();
+        when(bookingRepository
+                .findByItemIdAndBookerId(any(Long.class), any(Long.class))
+        ).thenReturn(List.of(booking));
+
+        Comment comment = Comment.builder()
+                .id(1L)
+                .text("text")
+                .item(item)
+                .author(booker)
+                .created(created)
+                .build();
+        when(commentRepository.save(any()))
+                .thenReturn(comment);
+
+        CommentDto commentDto = CommentDto.builder()
+                .text("comment")
+                .build();
+        Assertions.assertThrows(BadRequestException.class, () -> itemService.addComment(commentDto, 1L, headers));
+    }
+
+    @Test
+    void commentAfter() {
+        User owner = User.builder()
+                .id(1L)
+                .name("user")
+                .email("user@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        LocalDateTime created = LocalDateTime.now();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(created.plusDays(5))
+                .end(created.plusMonths(4))
+                .item(item)
+                .booker(booker)
+                .status(Status.REJECTED)
+                .build();
+        when(bookingRepository
+                .findByItemIdAndBookerId(any(Long.class), any(Long.class))
+        ).thenReturn(List.of(booking));
+
+        Comment comment = Comment.builder()
+                .id(1L)
+                .text("text")
+                .item(item)
+                .author(booker)
+                .created(created)
+                .build();
+        when(commentRepository.save(any()))
+                .thenReturn(comment);
+
+        CommentDto commentDto = CommentDto.builder()
+                .text("comment")
+                .build();
+        Assertions.assertThrows(BadRequestException.class, () -> itemService.addComment(commentDto, 1L, headers));
+    }
+
+    @Test
     void throwNotFoundValueExceptionComment() {
         User owner = User.builder()
                 .id(2L)
@@ -583,5 +785,97 @@ class ItemServiceImplTest {
                 .build();
 
         Assertions.assertThrows(NotFoundValueException.class, () -> itemService.addComment(commentDto, 1L, headers));
+    }
+
+    @Test
+    void getItemBookings() {
+        User user = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        User owner = User.builder()
+                .id(2L)
+                .name("user2")
+                .email("user2@email.com")
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        LocalDateTime created = LocalDateTime.now();
+        Comment comment = Comment.builder()
+                .id(1L)
+                .text("text")
+                .item(item)
+                .author(booker)
+                .created(created)
+                .build();
+        List<Comment> commentList = List.of(comment);
+
+        ItemDto itemDto;
+
+        Booking lastBooking = Booking.builder()
+                .id(1L)
+                .start(created.minusMonths(5))
+                .end(created.minusMonths(4))
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        Booking nextBooking = Booking.builder()
+                .id(2L)
+                .start(created.plusDays(1L))
+                .end(created.plusDays(2L))
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(userStorage.findById(1L))
+                .thenReturn(Optional.of(user));
+
+        when(userStorage.findById(2L))
+                .thenReturn(Optional.of(owner));
+
+        when(userService.getUsers())
+                .thenReturn(List.of(UserDto.toUserDto(user), UserDto.toUserDto(owner)));
+
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        when(commentRepository.findAllByItemId(1L))
+                .thenReturn(commentList);
+
+        itemDto = itemService.getItemDto(headers, 1L);
+        assertThat(itemDto, is(notNullValue()));
+
+        when(bookingRepository.findTop1BookingByItemIdAndEndIsBeforeAndStatusIs(any(), any(), any(), any()))
+                .thenReturn(Optional.empty());
+        when(bookingRepository.findTop1BookingByItemIdAndEndIsAfterAndStatusIs(any(), any(), any(), any()))
+                .thenReturn(Optional.empty());
+        itemDto = itemService.getItemDto(headers, 1L);
+        assertThat(itemDto.getLastBooking(), is(nullValue()));
+        assertThat(itemDto.getNextBooking(), is(nullValue()));
+
+        when(bookingRepository.findTop1BookingByItemIdAndEndIsBeforeAndStatusIs(any(), any(), any(), any()))
+                .thenReturn(Optional.of(lastBooking));
+        when(bookingRepository.findTop1BookingByItemIdAndEndIsAfterAndStatusIs(any(), any(), any(), any()))
+                .thenReturn(Optional.of(nextBooking));
+        itemDto = itemService.getItemDto(headers, 1L);
+        assertThat(itemDto, is(notNullValue()));
     }
 }
