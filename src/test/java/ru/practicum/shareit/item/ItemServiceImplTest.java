@@ -28,7 +28,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -327,7 +328,7 @@ class ItemServiceImplTest {
         when(itemRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(item));
 
-        Assertions.assertThrows(NotFoundValueException.class, () ->itemService.getItem(headers, 1L));
+        Assertions.assertThrows(NotFoundValueException.class, () -> itemService.getItem(headers, 1L));
     }
 
     @Test
