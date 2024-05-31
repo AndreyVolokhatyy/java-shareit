@@ -647,6 +647,56 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getAllBookingsByUserOwnerPast() {
+        LocalDateTime start = LocalDateTime.now().minusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findByEndBeforeAndItemUserIdOrderByStartDesc(any(), any(Long.class), any()))
+                .thenReturn(List.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.PAST, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
+    }
+
+    @Test
     void getAllBookingsByUserOwner() {
         LocalDateTime start = LocalDateTime.now().plusDays(1L);
         LocalDateTime end = LocalDateTime.now().plusDays(2L);
@@ -686,14 +736,214 @@ class BookingServiceImplTest {
                 .status(Status.APPROVED)
                 .build();
 
-        when(bookingRepository.findById(1L))
-                .thenReturn(Optional.of(booking));
+        when(bookingRepository.findAllByItemUserIdOrderByStartDesc(any(Long.class), any()))
+                .thenReturn(List.of(booking));
 
         when(userService.getUser(1L))
                 .thenReturn(userDto);
 
-        Collection<BookingCreatedDto> bookingInfoDto = bookingService.getAllBookingsByUserOwner(State.ALL, headers, 1L, 100L);
-        assertThat(bookingInfoDto, is(notNullValue()));
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.ALL, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
+    }
+
+    @Test
+    void getAllBookingsByUserOwnerFuture() {
+        LocalDateTime start = LocalDateTime.now().plusDays(11L);
+        LocalDateTime end = LocalDateTime.now().plusDays(12L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findAllByItemUserIdAndStartAfterOrderByStartDesc(any(Long.class), any(), any()))
+                .thenReturn(List.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.FUTURE, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
+    }
+
+    @Test
+    void getAllBookingsByUserOwnerCurrent() {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now().plusDays(11L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(any(), any(), any(Long.class), any()))
+                .thenReturn(List.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.CURRENT, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
+    }
+
+    @Test
+    void getAllBookingsByUserOwnerWaiting() {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now().plusDays(11L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.WAITING)
+                .build();
+
+        when(bookingRepository.findAllByItemUserIdAndStatusOrderByStartDesc(any(Long.class), any(), any()))
+                .thenReturn(List.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.WAITING, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
+    }
+
+    @Test
+    void getAllBookingsByUserOwnerRejected() {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now().plusDays(11L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(false)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.WAITING)
+                .build();
+
+        when(bookingRepository.findAllByItemUserIdAndStatusOrderByStartDesc(any(Long.class), any(), any()))
+                .thenReturn(List.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        List<BookingCreatedDto> bookingInfoDto = new ArrayList<>(bookingService.getAllBookingsByUserOwner(State.REJECTED, headers, 1L, 100L));
+        Assertions.assertEquals(bookingInfoDto.get(0).getId(), 1L);
     }
 
     @Test
