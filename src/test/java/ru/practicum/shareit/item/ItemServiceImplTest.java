@@ -14,6 +14,7 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.storage.CommentStorage;
 import ru.practicum.shareit.heandler.exception.NotFoundValueException;
+import ru.practicum.shareit.heandler.exception.PaginationException;
 import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -543,5 +544,45 @@ class ItemServiceImplTest {
                 .build();
         commentDto = itemService.addComment(commentDto, 1L, headers);
         assertThat(commentDto, is(notNullValue()));
+    }
+
+    @Test
+    void throwNotFoundValueExceptionComment() {
+        User owner = User.builder()
+                .id(2L)
+                .name("user2")
+                .email("user2@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+        when(userStorage.findById(3L))
+                .thenReturn(Optional.of(booker));
+
+        LocalDateTime created = LocalDateTime.now();
+
+        when(bookingRepository
+                .findById(any(Long.class))
+        ).thenReturn(Optional.empty());
+
+        CommentDto commentDto = CommentDto.builder()
+                .text("comment")
+                .build();
+
+        Assertions.assertThrows(NotFoundValueException.class, () -> itemService.addComment(commentDto, 1L, headers));
     }
 }
