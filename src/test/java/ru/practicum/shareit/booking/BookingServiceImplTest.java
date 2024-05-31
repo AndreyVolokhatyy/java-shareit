@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.enums.State;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.service.impl.BookingServiceImpl;
+import ru.practicum.shareit.heandler.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -167,7 +170,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBooking() {
+    void getBookingById() {
         LocalDateTime start = LocalDateTime.now().plusDays(1L);
         LocalDateTime end = LocalDateTime.now().plusDays(2L);
 
@@ -205,5 +208,110 @@ class BookingServiceImplTest {
 
         BookingCreatedDto bookingInfoDto = bookingService.getBookingById(1L, headers);
         assertThat(bookingInfoDto, is(notNullValue()));
+    }
+
+    @Test
+    void getUserBookings() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        Collection<BookingCreatedDto> bookingInfoDto = bookingService.getUserBookings(State.ALL, headers, 1L, 100L);
+        assertThat(bookingInfoDto, is(notNullValue()));
+    }
+
+    @Test
+    void getAllBookingsByUserOwner() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("user1")
+                .email("user1@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        final Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        Collection<BookingCreatedDto> bookingInfoDto = bookingService.getAllBookingsByUserOwner(State.ALL, headers, 1L, 100L);
+        assertThat(bookingInfoDto, is(notNullValue()));
+    }
+
+    @Test
+    void validateBooking() {
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.validateBooking(100L));
     }
 }

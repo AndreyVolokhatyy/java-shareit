@@ -2,8 +2,10 @@ package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import ru.practicum.shareit.user.model.User;
 
+@JsonTest
 class UserTest {
 
     @Test
