@@ -3,7 +3,6 @@ package ru.practicum.shareit.converter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.enums.State;
-import ru.practicum.shareit.comment.model.Comment;
 
 class CommentTest {
 
