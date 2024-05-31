@@ -14,7 +14,6 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.storage.CommentStorage;
 import ru.practicum.shareit.heandler.exception.NotFoundValueException;
-import ru.practicum.shareit.heandler.exception.PaginationException;
 import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
