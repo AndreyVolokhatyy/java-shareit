@@ -24,6 +24,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.service.repository.UserStorage;
 
+import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -155,6 +156,29 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void throwValidationException() {
+        ItemDto itemDto = ItemDto.builder()
+                .description("description")
+                .available(true)
+                .build();
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> itemService.createItem(headers, itemDto));
+    }
+
+    @Test
+    void throwNotFoundValueException() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("asd")
+                .description("description")
+                .available(true)
+                .build();
+
+        Assertions.assertThrows(NotFoundValueException.class,
+                () -> itemService.createItem(headers, itemDto));
+    }
+
+    @Test
     void update() {
         User owner = User.builder()
                 .id(1L)
@@ -196,6 +220,65 @@ class ItemServiceImplTest {
                 .available(true)
                 .user(owner)
                 .build();
+        when(itemRepository.save(any()))
+                .thenReturn(itemUpdated);
+
+        ItemCreatedDto itemCreatedDto = itemService.updateItem(headers, 1L, itemDto);
+        assertThat(itemCreatedDto, is(notNullValue()));
+    }
+
+    @Test
+    void updateNotFoundValueException() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("nameUpdated")
+                .description("descriptionUpdated")
+                .build();
+
+        Assertions.assertThrows(NotFoundValueException.class,
+                () -> itemService.updateItem(headers, 1L, itemDto));
+    }
+
+    @Test
+    void updateAll() {
+        User owner = User.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
+
+        when(userService.getUser(1L))
+                .thenReturn(userDto);
+
+        ItemDto itemDto = ItemDto.builder()
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+        when(itemRepository.findById(1L))
+                .thenReturn(Optional.of(item));
+
+        Item itemUpdated = Item.builder()
+                .id(1L)
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(true)
+                .user(owner)
+                .build();
+
         when(itemRepository.save(any()))
                 .thenReturn(itemUpdated);
 

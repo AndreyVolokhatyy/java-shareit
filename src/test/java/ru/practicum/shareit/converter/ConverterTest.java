@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.enums.State;
 
-class CommentTest {
+class ConverterTest {
 
     @Test
     void testEquals() {
