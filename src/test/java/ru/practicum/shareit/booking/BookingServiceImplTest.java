@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.service.impl.BookingServiceImpl;
+import ru.practicum.shareit.heandler.exception.BadRequestException;
 import ru.practicum.shareit.heandler.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
@@ -167,6 +168,135 @@ class BookingServiceImplTest {
 
         BookingCreatedDto bookingInfoDto = bookingService.approveBooking(1L, true, headers);
         assertThat(bookingInfoDto, is(notNullValue()));
+    }
+
+    @Test
+    void approveNotOwner() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(false)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.WAITING)
+                .build();
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking);
+
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.approveBooking(1L, true, headers));
+    }
+
+    @Test
+    void approveApproved() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(false)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.APPROVED)
+                .build();
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking);
+
+        Assertions.assertThrows(BadRequestException.class, () -> bookingService.approveBooking(1L, true, headers));
+    }
+
+    @Test
+    void approveRejected() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        User booker = User.builder()
+                .id(3L)
+                .name("user3")
+                .email("user3@email.com")
+                .build();
+
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(start)
+                .end(end)
+                .item(item)
+                .booker(booker)
+                .status(Status.REJECTED)
+                .build();
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking);
+
+        Assertions.assertThrows(BadRequestException.class, () -> bookingService.approveBooking(1L, false, headers));
     }
 
     @Test
