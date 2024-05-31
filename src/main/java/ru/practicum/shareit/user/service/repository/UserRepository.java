@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 
 public interface UserRepository {
 
-    User get(int id);
+    User get(long id);
 
     void put(User user);
 
-    void delete(int id);
+    void delete(long id);
 
     Stream<User> getStream();
 }

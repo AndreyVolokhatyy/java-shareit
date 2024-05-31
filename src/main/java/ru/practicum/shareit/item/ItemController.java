@@ -2,8 +2,9 @@ package ru.practicum.shareit.item;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -22,13 +23,13 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Item createItem(@RequestHeader Map<String, String> headers, @Valid @RequestBody ItemDto itemDto) {
+    public ItemCreatedDto createItem(@RequestHeader Map<String, String> headers, @Valid @RequestBody ItemDto itemDto) {
         return itemService.createItem(headers, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public Item itemUpdate(@RequestHeader Map<String, String> headers,
+    public ItemCreatedDto itemUpdate(@RequestHeader Map<String, String> headers,
                            @PathVariable(value = "itemId") int itemId,
                            @Valid @RequestBody ItemDto itemDto) {
         return itemService.updateItem(headers, itemId, itemDto);
@@ -36,19 +37,26 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public Item getItem(@RequestHeader Map<String, String> headers, @PathVariable(value = "itemId") int id) {
-        return itemService.getItem(headers, id);
+    public ItemDto getItem(@RequestHeader Map<String, String> headers, @PathVariable(value = "itemId") int id) {
+        return itemService.getItemDto(headers, id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Set<Item> getItem(@RequestHeader Map<String, String> headers) {
+    public Set<ItemDto> getItem(@RequestHeader Map<String, String> headers) {
         return itemService.getItemUser(headers);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Set<Item> searchItem(@RequestParam String text) {
+    public Set<ItemCreatedDto> searchItem(@RequestParam String text) {
         return itemService.searchItem(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader Map<String, String> headers,
+                                                 @PathVariable(value = "itemId") long itemId,
+                                                 @Valid @RequestBody CommentDto commentCreatedDto) {
+        return itemService.addComment(commentCreatedDto, itemId, headers);
     }
 }
