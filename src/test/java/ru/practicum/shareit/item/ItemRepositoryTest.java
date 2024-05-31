@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.repository.ItemStorage;
 import ru.practicum.shareit.request.model.Request;
@@ -27,6 +28,7 @@ class ItemRepositoryTest {
     private ItemStorage itemStorage;
 
     @Test
+    @DirtiesContext
     void searchAvailableByText() {
         User owner = User.builder()
                 .name("user1")
@@ -49,6 +51,7 @@ class ItemRepositoryTest {
     }
 
     @Test
+    @DirtiesContext
     void searchFindAllByRequestId() {
         User owner = User.builder()
                 .name("user1")
@@ -85,6 +88,7 @@ class ItemRepositoryTest {
     }
 
     @Test
+    @DirtiesContext
     void searchFindAllByRequestIdIn() {
         User owner = User.builder()
                 .name("user1")
