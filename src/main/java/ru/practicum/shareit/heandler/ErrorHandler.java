@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.heandler.exception.BadRequestException;
 import ru.practicum.shareit.heandler.exception.NotFoundException;
 import ru.practicum.shareit.heandler.exception.NotFoundValueException;
+import ru.practicum.shareit.heandler.exception.PaginationException;
 
 import javax.validation.ValidationException;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice("ru.practicum.shareit")
 public class ErrorHandler {
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class, BadRequestException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class, BadRequestException.class, PaginationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleBadRequest() {
         return Map.of("Validation error", "Check your request.");

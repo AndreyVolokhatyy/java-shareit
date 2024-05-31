@@ -4,21 +4,26 @@ import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "request")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode
 public class Request {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
+    @Column(name = "description")
     private String description;
-    @OneToOne
-    @JoinColumn(name = "requestor_id", referencedColumnName = "id")
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "requestor_id")
+    private User requester;
+    @Column(name = "create_date")
+    private LocalDateTime created;
 }

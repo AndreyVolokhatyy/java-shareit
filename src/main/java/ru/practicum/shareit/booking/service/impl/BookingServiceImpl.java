@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.service.impl;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingCreatedDto;
@@ -14,6 +16,7 @@ import ru.practicum.shareit.heandler.exception.InternalServerErrorException;
 import ru.practicum.shareit.heandler.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.page.PageRequestManager;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -89,27 +92,29 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingCreatedDto> getUserBookings(State state, Map<String, String> headers) {
+    public Collection<BookingCreatedDto> getUserBookings(State state, Map<String, String> headers, Long from, Long size) {
         long userId = userService.getUser(getUserId(headers)).getId();
+        PageRequest pageReq = PageRequestManager.form(
+                from.intValue(), size.intValue(), Sort.Direction.DESC, "start");
         switch (state) {
             case ALL:
-                return bookingStorage.findAllByBookerIdOrderByStartDesc(userId)
+                return bookingStorage.findAllByBookerIdOrderByStartDesc(userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case PAST:
-                return bookingStorage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId)
+                return bookingStorage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case FUTURE:
-                return bookingStorage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId)
+                return bookingStorage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case CURRENT:
                 return bookingStorage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
-                        LocalDateTime.now(), LocalDateTime.now(), userId)
+                                LocalDateTime.now(), LocalDateTime.now(), userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case WAITING:
-                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING)
+                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case REJECTED:
-                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED)
+                return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
@@ -117,27 +122,29 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingCreatedDto> getAllBookingsByUserOwner(State state, Map<String, String> headers) {
+    public Collection<BookingCreatedDto> getAllBookingsByUserOwner(State state, Map<String, String> headers, Long from, Long size) {
         long userId = userService.getUser(getUserId(headers)).getId();
+        PageRequest pageReq = PageRequestManager.form(
+                from.intValue(), size.intValue(), Sort.Direction.DESC, "start");
         switch (state) {
             case ALL:
-                return bookingStorage.findAllByItemUserIdOrderByStartDesc(userId)
+                return bookingStorage.findAllByItemUserIdOrderByStartDesc(userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case PAST:
-                return bookingStorage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId)
+                return bookingStorage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case FUTURE:
-                return bookingStorage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now())
+                return bookingStorage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case CURRENT:
                 return bookingStorage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
-                        LocalDateTime.now(), LocalDateTime.now(), userId)
+                                LocalDateTime.now(), LocalDateTime.now(), userId, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case WAITING:
-                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING)
+                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             case REJECTED:
-                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED)
+                return bookingStorage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED, pageReq)
                         .stream().map(BookingCreatedDto::toBookingDto).collect(Collectors.toList());
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
