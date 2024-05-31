@@ -203,7 +203,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getItem() {
+    void getItemDto() {
 
         UserDto userDto = UserDto.builder()
                 .id(1L)
@@ -266,6 +266,68 @@ class ItemServiceImplTest {
 
         itemDto = itemService.getItemDto(headers, 1L);
         assertThat(itemDto, is(notNullValue()));
+    }
+
+    @Test
+    void getItem() {
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user")
+                .email("user@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(userService.getUsers())
+                .thenReturn(List.of(userDto));
+
+        when(itemRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(item));
+
+        Item itemReturned = itemService.getItem(headers, 1L);
+        Assertions.assertEquals(itemReturned.getId(), 1L);
+    }
+
+    @Test
+    void getItemNotFound() {
+
+        UserDto userDto = UserDto.builder()
+                .id(1L)
+                .name("name")
+                .email("user@email.com")
+                .build();
+
+        User owner = User.builder()
+                .id(1L)
+                .name("user")
+                .email("user@email.com")
+                .build();
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .user(owner)
+                .build();
+
+        when(itemRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(item));
+
+        Assertions.assertThrows(NotFoundValueException.class, () ->itemService.getItem(headers, 1L));
     }
 
     @Test
