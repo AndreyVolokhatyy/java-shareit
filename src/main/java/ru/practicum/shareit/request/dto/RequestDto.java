@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import ru.practicum.shareit.item.dto.ItemCreatedDto;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Data
 @Builder
+@EqualsAndHashCode
 public class RequestDto {
 
     private Long id;
@@ -39,10 +41,5 @@ public class RequestDto {
                 .requester(user)
                 .created(requestDto.getCreated())
                 .build();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return true;
     }
 }
