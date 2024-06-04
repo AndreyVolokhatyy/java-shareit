@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
             if (checkEmail(userDto.getEmail()) == 0 || checkEmail(userDto.getEmail()) == id) {
                 user.setEmail(userDto.getEmail());
             } else {
-                throw new RuntimeException();
+                throw new RuntimeException("Error add email. Change value");
             }
         }
         return UserDto.toUserDto(userStorage.save(user));

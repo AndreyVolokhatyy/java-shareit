@@ -58,7 +58,6 @@ public class ItemServiceImpl implements ItemService {
         }
         Item item = ItemDto.toItem(itemDto);
         item.setUser(UserDto.toUser(userService.getUser(userId)));
-        item.setRequest(itemRequestService.getItemRequests().get(itemDto.getRequest()));
         return ItemCreatedDto.toItemDto(itemStorage.save(item));
     }
 
@@ -77,9 +76,6 @@ public class ItemServiceImpl implements ItemService {
         }
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
-        }
-        if (itemDto.getRequest() != null) {
-            item.setRequest(itemRequestService.getItemRequests().get(itemDto.getRequest()));
         }
         return ItemCreatedDto.toItemDto(itemStorage.save(item));
     }

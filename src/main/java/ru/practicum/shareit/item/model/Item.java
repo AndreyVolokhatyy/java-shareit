@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Entity
 @Table(name = "item")
+@EqualsAndHashCode
 public class Item {
 
     @Id

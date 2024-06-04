@@ -15,9 +15,9 @@ public interface BookingService {
 
     BookingCreatedDto getBookingById(long bookingId, Map<String, String> headers);
 
-    Collection<BookingCreatedDto> getUserBookings(State state, Map<String, String> headers);
+    Collection<BookingCreatedDto> getUserBookings(State state, Map<String, String> headers, Long from, Long size);
 
-    Collection<BookingCreatedDto> getAllBookingsByUserOwner(State state, Map<String, String> headers);
+    Collection<BookingCreatedDto> getAllBookingsByUserOwner(State state, Map<String, String> headers, Long from, Long size);
 
     Booking validateBooking(long bookingId);
 }
