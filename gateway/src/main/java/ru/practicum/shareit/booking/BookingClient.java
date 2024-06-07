@@ -1,4 +1,4 @@
-package src.main.java.ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,7 @@ import java.util.Map;
 
 @Service
 public class BookingClient extends BaseClient {
+
     private static final String API_PREFIX = "/bookings";
 
     @Autowired
@@ -22,7 +23,7 @@ public class BookingClient extends BaseClient {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
+                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                         .build()
         );
     }

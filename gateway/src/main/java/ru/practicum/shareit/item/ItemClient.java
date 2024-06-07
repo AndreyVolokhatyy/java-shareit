@@ -1,4 +1,4 @@
-package src.main.java.ru.practicum.shareit.item;
+package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ public class ItemClient extends BaseClient {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
+                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                         .build()
         );
     }

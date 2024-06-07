@@ -1,4 +1,4 @@
-package src.main.java.ru.practicum.shareit.user;
+package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ public class UserClient extends BaseClient {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
+                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                         .build()
         );
     }

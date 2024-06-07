@@ -1,11 +1,11 @@
-package src.main.java.ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.practicum.shareit.booking.dto.BookingCutDto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data

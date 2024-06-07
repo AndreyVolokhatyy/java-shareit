@@ -6,7 +6,7 @@ import ru.practicum.shareit.booking.dto.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter

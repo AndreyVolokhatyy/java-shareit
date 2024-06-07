@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -25,6 +25,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -135,7 +136,7 @@ public class BookingServiceImpl implements BookingService {
                     PageRequest.of(pager.getIndex(), pager.getPageSize(), sort);
             do {
                 page = getPageBookings(state, userId, pageable);
-                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).toList());
+                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).collect(Collectors.toList()));
                 pageable = pageable.next();
             } while (page.hasNext());
 
@@ -144,7 +145,7 @@ public class BookingServiceImpl implements BookingService {
                 pageable =
                         PageRequest.of(i, pager.getPageSize(), sort);
                 page = getPageBookings(state, userId, pageable);
-                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).toList());
+                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).collect(Collectors.toList()));
                 if (!page.hasNext()) {
                     break;
                 }
@@ -198,7 +199,7 @@ public class BookingServiceImpl implements BookingService {
                     PageRequest.of(pager.getIndex(), pager.getPageSize(), sort);
             do {
                 page = getPageBookingsOwner(state, userId, pageable);
-                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).toList());
+                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).collect(Collectors.toList()));
                 pageable = pageable.next();
             } while (page.hasNext());
 
@@ -207,7 +208,7 @@ public class BookingServiceImpl implements BookingService {
                 pageable =
                         PageRequest.of(i, pager.getPageSize(), sort);
                 page = getPageBookingsOwner(state, userId, pageable);
-                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).toList());
+                listBookingDto.addAll(page.stream().map(mapper::toBookingDto).collect(Collectors.toList()));
                 if (!page.hasNext()) {
                     break;
                 }
