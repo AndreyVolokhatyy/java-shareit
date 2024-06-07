@@ -41,7 +41,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto create(ItemRequestDto itemRequestDto, Map<String, String> headers) {
         Long requestorId = HeaderSerialization.getUserId(headers);
-        ItemRequest itemRequest = mapper.toItemRequest(itemRequestDto, requestorId, LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+        ItemRequest itemRequest = mapper.toItemRequest(itemRequestDto, requestorId, LocalDateTime.now());
         return mapper.toItemRequestDto(repository.save(itemRequest));
     }
 

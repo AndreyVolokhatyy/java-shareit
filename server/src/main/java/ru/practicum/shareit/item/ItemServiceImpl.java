@@ -215,7 +215,7 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = new Comment();
         Booking booking = checker.getBookingWithUserBookedItem(itemId, userId);
         if (booking != null) {
-            comment.setCreated(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+            comment.setCreated(LocalDateTime.now());
             comment.setItem(booking.getItem());
             comment.setAuthor(booking.getBooker());
             comment.setText(commentDto.getText());

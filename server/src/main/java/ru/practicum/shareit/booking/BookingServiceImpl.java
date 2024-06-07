@@ -162,14 +162,14 @@ public class BookingServiceImpl implements BookingService {
                 page = repository.findByBookerId(userId, pageable);
                 break;
             case CURRENT:
-                page = repository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")),
-                        LocalDateTime.now(ZoneId.of("Europe/Moscow")), pageable);
+                page = repository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
+                        LocalDateTime.now(), pageable);
                 break;
             case PAST:
-                page = repository.findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")), pageable);
+                page = repository.findByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), pageable);
                 break;
             case FUTURE:
-                page = repository.findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")), pageable);
+                page = repository.findByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), pageable);
                 break;
             case WAITING:
                 page = repository.findByBookerIdAndStatus(userId, Status.WAITING, pageable);
@@ -225,14 +225,14 @@ public class BookingServiceImpl implements BookingService {
                 page = repository.findByItemOwnerId(userId, pageable);
                 break;
             case CURRENT:
-                page = repository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")),
-                        LocalDateTime.now(ZoneId.of("Europe/Moscow")), pageable);
+                page = repository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(),
+                        LocalDateTime.now(), pageable);
                 break;
             case PAST:
-                page = repository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")), pageable);
+                page = repository.findByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), pageable);
                 break;
             case FUTURE:
-                page = repository.findByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")),
+                page = repository.findByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(),
                         pageable);
                 break;
             case WAITING:
@@ -250,18 +250,18 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingCutDto getLastBooking(Long itemId) {
         return mapper.toBookingShortDto(repository.findFirstByItemIdAndStartBeforeAndStatusOrderByEndDesc(itemId,
-                LocalDateTime.now(ZoneId.of("Europe/Moscow")), Status.APPROVED));
+                LocalDateTime.now(), Status.APPROVED));
     }
 
     @Override
     public BookingCutDto getNextBooking(Long itemId) {
         return mapper.toBookingShortDto(repository.findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(itemId,
-                LocalDateTime.now(ZoneId.of("Europe/Moscow")), Status.APPROVED));
+                LocalDateTime.now(), Status.APPROVED));
     }
 
     @Override
     public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {
         return repository.findFirstByItemIdAndBookerIdAndEndIsBeforeAndStatus(itemId,
-                userId, LocalDateTime.now(ZoneId.of("Europe/Moscow")), Status.APPROVED);
+                userId, LocalDateTime.now(), Status.APPROVED);
     }
 }
